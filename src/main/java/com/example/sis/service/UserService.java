@@ -47,6 +47,7 @@ public class UserService {
         UserEntity userEntity = userEntityRepository.findByUserName(username).orElseThrow(()->new SnsApplicationException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded", username)));
 
         //비밀번호 체크
+        //TODO: 비밀번호가 그냥 평문으로 쳤을때 로그인이 되지 않음
         if (encoder.matches(password, userEntity.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
