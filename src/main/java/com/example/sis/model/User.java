@@ -1,21 +1,33 @@
 package com.example.sis.model;
 
 import com.example.sis.model.entity.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.List;
 
+@Data
 @AllArgsConstructor
-@Getter
-public class User {
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class User implements UserDetails {
     private Integer id;
     private String userName;
     private String password;
-    private UserRole userRole;
+    private UserRole role;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
-    private Timestamp deletedAt;
+    private Timestamp removedAt;
+
 
     public static User fromEntity(UserEntity entity) {
         return new User(
@@ -23,9 +35,81 @@ public class User {
                 entity.getUserName(),
                 entity.getPassword(),
                 entity.getRole(),
-                entity.getRegisterAt(),
+                entity.getRegisteredAt(),
                 entity.getUpdatedAt(),
-                entity.getDeletedAt()
+                entity.getRemovedAt()
         );
     }
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.toString()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.userName;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return removedAt == null;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return removedAt == null;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return removedAt == null;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return removedAt == null;
+    }
 }
+
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        return List.of(new SimpleGrantedAuthority(role.toString()));
+//    }
+//
+//    @Override
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    @Override
+//    public String getUsername() {
+//        return userName;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonExpired() {
+//        return removedAt == null;
+//    }
+//
+//    @Override
+//    public boolean isAccountNonLocked() {
+//        return removedAt == null;
+//    }
+//
+//    @Override
+//    public boolean isCredentialsNonExpired() {
+//        return removedAt == null;
+//    }
+//
+//    @Override
+//    public boolean isEnabled() {
+//        return removedAt == null;
+//    }
+//}
+

@@ -17,4 +17,20 @@ public class Response<T> { // 여러 분야에 많이 쓰이기 때문에 Generi
     public static <T> Response<T> success(T result) {
         return new Response<>("SUCCESS", result);
     }
+    public static Response<Void> success() {
+        return new Response<>("SUCCESS", null);
+    }
+
+    public String toStream() {
+        if (result == null) {
+            return "{" +
+                    "\"resultCode\":" + "\"" + resultCode + "\"," +
+                    "\"result\":" + null +
+                    "}";
+        }
+        return "{" +
+                "\"resultCode\":" + "\"" + resultCode + "\"," +
+                "\"result\":" + "\"" + result + "\"," +
+                "}";
+    }
 }

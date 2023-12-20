@@ -2,8 +2,10 @@ package com.example.sis.Controller;
 
 
 import com.example.sis.Controller.request.UserJoinRequest;
+import com.example.sis.Controller.request.UserLoginRequest;
 import com.example.sis.Controller.response.Response;
 import com.example.sis.Controller.response.UserJoinResponse;
+import com.example.sis.Controller.response.UserLoginResponse;
 import com.example.sis.model.User;
 import com.example.sis.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +24,17 @@ public class UserController {
 
     @PostMapping("/join")
     public Response<UserJoinResponse> join(@RequestBody UserJoinRequest request) {
-        User user = userService.join(request.getUserName(), request.getPasswoad());
-        UserJoinResponse userJoinResponse = UserJoinResponse.fromUser(user);
-
-        return Response.success(userJoinResponse);
+        return Response.success(UserJoinResponse.fromUser(userService.join(request.getName(), request.getPassword())));
     }
 
-    @PostMapping
-    public void login() {
-        userService.login();
+    @PostMapping("/login")
+    public Response<UserLoginResponse> login(@RequestBody UserLoginRequest request) {
+        String token = userService.login(request.getName(), request.getPassword());
+        return Response.success(new UserLoginResponse(token));
     }
+
+//    @PostMapping
+//    public void login() {
+//        userService.login();
+//    }
 }
