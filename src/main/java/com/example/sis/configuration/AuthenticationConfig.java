@@ -30,6 +30,8 @@ public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().regexMatchers("^(?!/api/).*");
+        //여기서 필터링을 한 번 해줌
+        //regex = 정규화(정해진 문자 패턴을 정해줌)
 
     }
 
