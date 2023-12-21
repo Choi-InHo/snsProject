@@ -9,10 +9,7 @@ import com.example.sis.Controller.response.UserLoginResponse;
 import com.example.sis.model.User;
 import com.example.sis.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,6 +29,7 @@ public class UserController {
         String token = userService.login(request.getName(), request.getPassword());
         return Response.success(new UserLoginResponse(token));
     }
+
 
 //    @PostMapping
 //    public void login() {
