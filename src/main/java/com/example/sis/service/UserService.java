@@ -6,6 +6,7 @@ import com.example.sis.model.Alarm;
 import com.example.sis.model.User;
 import com.example.sis.model.entity.UserEntity;
 import com.example.sis.repository.AlarmEntityRepository;
+import com.example.sis.repository.UserCacheRepository;
 import com.example.sis.repository.UserEntityRepository;
 import com.example.sis.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class UserService {
     private final UserEntityRepository userEntityRepository;
     private final BCryptPasswordEncoder encoder;
     private final AlarmEntityRepository alarmEntityRepository;
+    private final UserCacheRepository userCacheRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -49,16 +51,18 @@ public class UserService {
     //String으로 받는 이유는 인증시 문자열 토큰을 이용해서 인증하기 때문임
     public String login(String username, String password) {
         //회원 가입 여부 체크
-        UserEntity userEntity = userEntityRepository.findByUserName(username).orElseThrow(()->new SnsApplicationException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded", username)));
+        User user = loadUserByUsername(username);
+        userCacheRepository.setUser(user);
 
         //비밀번호 체크
         //TODO: 비밀번호가 그냥 평문으로 쳤을때 로그인이 되지 않음
-        if (!encoder.matches(password, userEntity.getPassword())) {
+        if (!encoder.matches(password, user.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 //        if (!userEntity.getPassword().equals(password)) {
 //            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"");
 //        }
+
 
         //토큰 생성
         String token = JwtTokenUtils.doGenerateToken(username,secretKey,expiredTimeMs);
@@ -67,8 +71,10 @@ public class UserService {
     }
 
     public User loadUserByUsername(String userName) {
-        return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
-                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded",userName)));
+        //redis 추가해준 부분
+        return userCacheRepository.getUser(userName).orElseGet(() ->
+        userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded",userName))));
     }
 
     public Page<Alarm> alarmList(String userName, Pageable pageable) {
