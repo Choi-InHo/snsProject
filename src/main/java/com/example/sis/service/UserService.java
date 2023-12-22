@@ -2,12 +2,16 @@ package com.example.sis.service;
 
 import com.example.sis.exception.ErrorCode;
 import com.example.sis.exception.SnsApplicationException;
+import com.example.sis.model.Alarm;
 import com.example.sis.model.User;
 import com.example.sis.model.entity.UserEntity;
+import com.example.sis.repository.AlarmEntityRepository;
 import com.example.sis.repository.UserEntityRepository;
 import com.example.sis.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,7 @@ public class UserService {
 
     private final UserEntityRepository userEntityRepository;
     private final BCryptPasswordEncoder encoder;
+    private final AlarmEntityRepository alarmEntityRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -48,7 +53,7 @@ public class UserService {
 
         //비밀번호 체크
         //TODO: 비밀번호가 그냥 평문으로 쳤을때 로그인이 되지 않음
-        if (encoder.matches(password, userEntity.getPassword())) {
+        if (!encoder.matches(password, userEntity.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
 //        if (!userEntity.getPassword().equals(password)) {
@@ -64,5 +69,11 @@ public class UserService {
     public User loadUserByUsername(String userName) {
         return userEntityRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(()->
                 new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded",userName)));
+    }
+
+    public Page<Alarm> alarmList(String userName, Pageable pageable) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(()->new SnsApplicationException(ErrorCode.USER_NOT_FOUND,String.format("%s not founded", userName)));
+
+        return alarmEntityRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
     }
 }

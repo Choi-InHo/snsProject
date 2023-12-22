@@ -2,16 +2,12 @@ package com.example.sis.service;
 
 import com.example.sis.exception.ErrorCode;
 import com.example.sis.exception.SnsApplicationException;
+import com.example.sis.model.AlarmArgs;
+import com.example.sis.model.AlarmType;
 import com.example.sis.model.Comment;
 import com.example.sis.model.Post;
-import com.example.sis.model.entity.CommentEntity;
-import com.example.sis.model.entity.LikeEntity;
-import com.example.sis.model.entity.PostEntity;
-import com.example.sis.model.entity.UserEntity;
-import com.example.sis.repository.CommentEntityRepository;
-import com.example.sis.repository.LikeEntityRepository;
-import com.example.sis.repository.PostEntityRepository;
-import com.example.sis.repository.UserEntityRepository;
+import com.example.sis.model.entity.*;
+import com.example.sis.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +25,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
 
     @Transactional
     public void create(String title, String body, String userName) {
@@ -102,6 +99,8 @@ public class PostService {
         //like save
         likeEntityRepository.save(LikeEntity.of(userEntity,postEntity));
 
+        alarmEntityRepository.save(AlarmEntity.of(AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId()), postEntity.getUser()));
+
     }
 
     @Transactional
@@ -127,6 +126,8 @@ public class PostService {
                 new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
         //comment save
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity,comment));
+
+        alarmEntityRepository.save(AlarmEntity.of(AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId()), postEntity.getUser()));
 
 
     }
