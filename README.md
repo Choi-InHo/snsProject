@@ -1,3 +1,13 @@
+사용 기술
+<hr>
+Tool : intellij
+Framework : spring boot
+Database : PostgresQL, Redis, Kafka
+front : react
+협업도구 : git
+ORM : JPA
+인증 : Spring Security, Oauth2, jwt
+
 Application Architecture
 <hr>
 <img width="499" alt="image" src="https://github.com/Choi-InHo/snsProject/assets/146165158/8f886715-98d4-4de1-aea4-2c8264ccfb6c">
